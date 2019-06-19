@@ -1,17 +1,18 @@
 meta:
   id: gadget_format1
   endian: le
+  ks-opaque-types: true
 seq:
   - id: gadget_header
     type: header
   - id: magic1
     type: u4
   - id: coordinates
-    type: vector_field(_index)
-    repeat: expr
-    repeat-expr: 6
-  - id: magic2
-    type: u4
+    type: particle_fields('f4', 3)
+  - id: velocities
+    type: particle_fields('f4', 3)
+  - id: particle_ids
+    type: particle_fields('u4', 1)
 types:
   header:
     seq:
@@ -63,37 +64,38 @@ types:
         repeat-expr: 16
       - id: recsize_1
         type: u4
-  scalar_field:
+  particle_fields:
+    params:
+      - id: field_type
+        type: str
+      - id: components
+        type: u1
+    seq:
+      - id: magic1
+        type: u4
+      - id: fields
+        type: field(_index, components, field_type)
+        repeat: expr
+        repeat-expr: 6
+      - id: magic2
+        type: u4
+  field:
     params:
       - id: index
         type: u1
-    seq:
-      - id: field
-        type: f4
-        repeat: expr
-        repeat-expr: _root.gadget_header.npart[index]
-  vector_field:
-    params:
-      - id: index
+      - id: components
         type: u1
+      - id: field_type
+        type: str
     seq:
-      #- id: recsize_0
-      #  type: u4
-      #  if: _root.npart[index] > 0
       - id: field
-        type: f4
+        type:
+          switch-on: field_type
+          cases:
+            '"f4"': f4
+            '"u4"': u4
+            '"f8"': f8
+            '"u8"': u8
+            _ : f4
         repeat: expr
-        repeat-expr: _root.gadget_header.npart[index] * 3
-      #- id: recsize_1
-      #  type: u4
-      #  if: _root.npart[index] > 0
-#                   ('FlagCooling', 1, 'i'),
-#                   ('NumFiles', 1, 'i'),
-#                   ('BoxSize', 1, 'd'),
-#                   ('Omega0', 1, 'd'),
-#                   ('OmegaLambda', 1, 'd'),
-#                   ('HubbleParam', 1, 'd'),
-#                   ('FlagAge', 1, 'i'),
-#                   ('FlagMetals', 1, 'i'),
-#                   ('NallHW', 6, 'i'),
-#                   ('unused', 16, 'i')),
+        repeat-expr: _root.gadget_header.npart[index] * components
