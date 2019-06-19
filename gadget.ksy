@@ -5,8 +5,6 @@ meta:
 seq:
   - id: gadget_header
     type: header
-  - id: magic1
-    type: u4
   - id: coordinates
     type: particle_fields('f4', 3)
   - id: velocities
@@ -89,13 +87,24 @@ types:
         type: str
     seq:
       - id: field
+        size: _root.gadget_header.npart[index] * components * 4
+        type: field_values(field_type)
+  field_values:
+    params:
+      - id: field_type
+        type: str
+    seq:
+      - id: buffer
+        size-eos: true
+    instances:
+      field_entries:
+        pos: 0
         type:
-          switch-on: field_type
-          cases:
-            '"f4"': f4
-            '"u4"': u4
-            '"f8"': f8
-            '"u8"': u8
-            _ : f4
-        repeat: expr
-        repeat-expr: _root.gadget_header.npart[index] * components
+            switch-on: field_type
+            cases:
+              '"f4"': f4
+              '"u4"': u4
+              '"f8"': f8
+              '"u8"': u8
+              _ : f4
+        repeat: eos
