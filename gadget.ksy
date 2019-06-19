@@ -2,6 +2,8 @@ meta:
   id: gadget_format1
   endian: le
   ks-opaque-types: true
+  imports:
+    - array_buffer
 seq:
   - id: gadget_header
     type: header
@@ -88,23 +90,4 @@ types:
     seq:
       - id: field
         size: _root.gadget_header.npart[index] * components * 4
-        type: field_values(field_type)
-  field_values:
-    params:
-      - id: field_type
-        type: str
-    seq:
-      - id: buffer
-        size-eos: true
-    instances:
-      field_entries:
-        pos: 0
-        type:
-            switch-on: field_type
-            cases:
-              '"f4"': f4
-              '"u4"': u4
-              '"f8"': f8
-              '"u8"': u8
-              _ : f4
-        repeat: eos
+        type: array_buffer(field_type)
