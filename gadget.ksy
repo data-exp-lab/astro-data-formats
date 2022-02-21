@@ -8,11 +8,18 @@ seq:
   - id: gadget_header
     type: header
   - id: coordinates
-    type: particle_fields('f4', 3)
+    type: particle_fields('f4', 3, _root.field_counts.all_fields)
   - id: velocities
-    type: particle_fields('f4', 3)
+    type: particle_fields('f4', 3, _root.field_counts.all_fields)
   - id: particle_ids
-    type: particle_fields('u4', 1)
+    type: particle_fields('u4', 1, _root.field_counts.all_fields)
+  - id: mass
+    type: particle_fields('f4', 1, _root.field_counts.has_mass)
+instances:
+  field_counts:
+    pos: 0
+    size: 1
+    type: has_fields
 types:
   header:
     seq:
@@ -70,11 +77,13 @@ types:
         type: str
       - id: components
         type: u1
+      - id: has_field
+        type: bool_value[]
     seq:
       - id: magic1
         type: u4
       - id: fields
-        type: field(_index, components, field_type)
+        type: field(_index, components, field_type, has_field[_index].value)
         repeat: expr
         repeat-expr: 6
       - id: magic2
@@ -87,7 +96,31 @@ types:
         type: u1
       - id: field_type
         type: str
+      - id: has_field
+        type: bool
     seq:
       - id: field
+        if: has_field
         size: _root.gadget_header.npart[index] * components * 4
         type: array_buffer(field_type)
+  bool_value:
+    params:
+      - id: this_value
+        type: bool
+    instances:
+      value:
+        value: this_value
+  has_fields:
+    seq:
+      - id: all_fields
+        repeat: expr
+        repeat-expr: 6
+        type: bool_value(true)
+      - id: has_mass
+        repeat: expr
+        repeat-expr: 6
+        type: bool_value(_root.gadget_header.massarr[_index] == 0)
+      - id: has_gas
+        repeat: expr
+        repeat-expr: 6
+        type: bool_value(_index == 2)
