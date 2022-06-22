@@ -48,9 +48,9 @@ types:
       - id: mass_sph
         type: fortran_record(1, "f8")
       - id: headl
-        type: fortran_skip
+        type: fortran_vector("u4")
       - id: taill
-        type: fortran_skip
+        type: fortran_vector("u4")
       - id: numbl
         type: fortran_vector("u4")
   fortran_record:
@@ -81,7 +81,17 @@ types:
     seq:
       - id: rec_size1
         type: u4
-      - id: value
+      - id: vector
+        type: vector_values(record_type)
+        size: rec_size1
+      - id: rec_size2
+        type: u4
+  vector_values:
+    params:
+      - id: record_type
+        type: str
+    seq:
+      - id: values
         type:
           switch-on: record_type
           cases:
@@ -89,9 +99,7 @@ types:
             '"u8"': u8
             '"f4"': f4
             '"f8"': f8
-        size: rec_size1
-      - id: rec_size2
-        type: u4
+        repeat: eos
   fortran_skip:
     seq:
       - id: rec_size1
