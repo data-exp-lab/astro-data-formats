@@ -5,8 +5,21 @@ meta:
 seq:
   - id: header
     type: ramses_header
-
+  - id: amr_info
+    type: ramses_amr_info
 types:
+  ramses_amr_info:
+    seq:
+      - id: level_infos
+        type: ramses_amr_level_info
+        repeat: expr
+        repeat-expr: _root.header.nlevelmax.value[0]
+  ramses_amr_level_info:
+    seq:
+      - id: cpu_info
+        type: ramses_level_cpu_info
+        repeat: expr
+        repeat-expr: _root.header.ncpu.value[0] + _root.header.nboundary.value[0]
   ramses_header:
     seq:
       - id: ncpu
@@ -53,6 +66,19 @@ types:
         type: fortran_vector("u4")
       - id: numbl
         type: fortran_vector("u4")
+      - id: unk1
+        type: fortran_skip
+      - id: ngridbound
+        if: nboundary.value[0] > 0
+        type: fortran_vector("u4")
+      - id: free_mem
+        type: fortran_record(5, "u4")
+      - id: ordering
+        type: charstring
+      - id: unk2
+        type: fortran_skip
+        repeat: expr
+        repeat-expr: 4
   fortran_record:
     params:
       - id: num_records
@@ -106,5 +132,15 @@ types:
         type: u4
       - id: contents
         size: rec_size1
+      - id: rec_size2
+        type: u4
+  charstring:
+    seq:
+      - id: rec_size1
+        type: u4
+      - id: contents
+        type: str
+        size: rec_size1
+        encoding: ascii
       - id: rec_size2
         type: u4
