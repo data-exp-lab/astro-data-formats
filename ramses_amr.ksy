@@ -27,6 +27,26 @@ types:
         type: fortran_record(1, "f8")
       - id: nout
         type: fortran_record(3, "u4")
+      - id: tout
+        type: fortran_record(nout.value[0], "f8")
+      - id: aout
+        type: fortran_record(nout.value[0], "f8")
+      - id: t
+        type: fortran_record(1, "f8")
+      - id: dtold
+        type: fortran_record(nlevelmax.value[0], "f8")
+      - id: dtnew
+        type: fortran_record(nlevelmax.value[0], "f8")
+      - id: nstep
+        type: fortran_record(2, "u4")
+      - id: stat
+        type: fortran_record(3, "f8")
+      - id: cosm
+        type: fortran_record(7, "f8")
+      - id: timing
+        type: fortran_record(5, "f8")
+      - id: mass_sph
+        type: fortran_record(1, "f8")
       - id: headl
         type: fortran_skip
       - id: taill
@@ -69,6 +89,7 @@ types:
             '"u8"': u8
             '"f4"': f4
             '"f8"': f8
+        size: rec_size1
       - id: rec_size2
         type: u4
   fortran_skip:
