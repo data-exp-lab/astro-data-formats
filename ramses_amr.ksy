@@ -13,13 +13,38 @@ types:
       - id: level_infos
         type: ramses_amr_level_info
         repeat: expr
-        repeat-expr: _root.header.nlevelmax.value[0]
+        repeat-expr: _root.header.nlevelmax.value[0].as<u4>
   ramses_amr_level_info:
     seq:
       - id: cpu_info
         type: ramses_level_cpu_info
         repeat: expr
-        repeat-expr: _root.header.ncpu.value[0] + _root.header.nboundary.value[0]
+        repeat-expr: _root.header.ncpu.value[0].as<u4> + _root.header.nboundary.value[0].as<u4>
+  ramses_level_cpu_info:
+    # This is where we need to check the number of grids here
+    # yt has:
+    # if icpu < ncpu:
+    #     ng = numbl[ilevel, icpu]
+    # else:
+    #     ng = ngridbound[icpu - ncpu + nboundary * ilevel]
+    # we should split this up and have it accept a parameter
+    seq:
+      - id: grid_index
+        type: fortran_skip
+      - id: grid_next
+        type: fortran_skip
+      - id: grid_prev
+        type: fortran_skip
+      - id: pos_x
+        type: fortran_vector("f8")
+      - id: pos_y
+        type: fortran_vector("f8")
+      - id: pos_z
+        type: fortran_vector("f8")
+      - id: fields
+        type: fortran_skip
+        repeat: expr
+        repeat-expr: 31
   ramses_header:
     seq:
       - id: ncpu
@@ -41,15 +66,15 @@ types:
       - id: nout
         type: fortran_record(3, "u4")
       - id: tout
-        type: fortran_record(nout.value[0], "f8")
+        type: fortran_record(nout.value[0].as<u4>, "f8")
       - id: aout
-        type: fortran_record(nout.value[0], "f8")
+        type: fortran_record(nout.value[0].as<u4>, "f8")
       - id: t
         type: fortran_record(1, "f8")
       - id: dtold
-        type: fortran_record(nlevelmax.value[0], "f8")
+        type: fortran_record(nlevelmax.value[0].as<u4>, "f8")
       - id: dtnew
-        type: fortran_record(nlevelmax.value[0], "f8")
+        type: fortran_record(nlevelmax.value[0].as<u4>, "f8")
       - id: nstep
         type: fortran_record(2, "u4")
       - id: stat
@@ -69,7 +94,7 @@ types:
       - id: unk1
         type: fortran_skip
       - id: ngridbound
-        if: nboundary.value[0] > 0
+        if: nboundary.value[0].as<u4> > 0
         type: fortran_vector("u4")
       - id: free_mem
         type: fortran_record(5, "u4")
