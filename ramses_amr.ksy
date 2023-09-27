@@ -11,13 +11,20 @@ types:
   ramses_amr_info:
     seq:
       - id: level_infos
-        type: ramses_amr_level_info
+        type: ramses_amr_level_info(_index)
         repeat: expr
         repeat-expr: _root.header.nlevelmax.value[0].as<u4>
   ramses_amr_level_info:
+    params:
+      - id: level
+        type: u4
     seq:
       - id: cpu_info
-        type: ramses_level_cpu_info
+        type:
+          switch-on: _root.header.numbl.vector[level].values[_index] 
+          cases:
+            0: empty_type
+            _: ramses_level_cpu_info
         repeat: expr
         repeat-expr: _root.header.ncpu.value[0].as<u4> + _root.header.nboundary.value[0].as<u4>
   ramses_level_cpu_info:
@@ -94,6 +101,7 @@ types:
         #type: fortran_vector("u4")
         # This is set up so that the first is of shape nlevelmax and second is
         # ncpu+nboundary.
+        # access like _root.header.numbl.vector[level].values[cpu]
         type:
           fortran_2d_vector("u4", nlevelmax.value[0].as<u4>)
       - id: unk1
@@ -190,3 +198,5 @@ types:
         encoding: ascii
       - id: rec_size2
         type: u4
+  empty_type:
+    seq: []
