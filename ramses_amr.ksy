@@ -90,7 +90,12 @@ types:
       - id: taill
         type: fortran_vector("u4")
       - id: numbl
-        type: fortran_vector("u4")
+        # numbl is of shape [nlevelmax, ncpu+nboundary]
+        #type: fortran_vector("u4")
+        # This is set up so that the first is of shape nlevelmax and second is
+        # ncpu+nboundary.
+        type:
+          fortran_2d_vector("u4", nlevelmax.value[0].as<u4>)
       - id: unk1
         type: fortran_skip
       - id: ngridbound
@@ -135,6 +140,22 @@ types:
       - id: vector
         type: vector_values(record_type)
         size: rec_size1
+      - id: rec_size2
+        type: u4
+  fortran_2d_vector:
+    params:
+      - id: record_type
+        type: str
+      - id: nrows
+        type: u4
+    seq:
+      - id: rec_size1
+        type: u4
+      - id: vector
+        type: vector_values(record_type)
+        repeat: expr
+        repeat-expr: nrows
+        size: rec_size1 / nrows
       - id: rec_size2
         type: u4
   vector_values:
